@@ -1,10 +1,14 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import PageHeader from '@/components/custom/PageHeader';
 import InfoCard from '@/components/custom/InfoCard';
-import { Shield, Users, FileText, MessageSquare, Inbox, Book, Eye, Check, X, BarChart3, Settings, Calendar, Clock } from 'lucide-react';
+import AdminTabs from '@/components/admin/AdminTabs';
+import AdminOverview from '@/components/admin/AdminOverview';
+import PendingItemsList from '@/components/admin/PendingItemsList';
+import { Shield } from 'lucide-react';
 
 const Admin = () => {
   const { user } = useAuth();
@@ -73,7 +77,6 @@ const Admin = () => {
       ...prev,
       [type]: prev[type as keyof typeof prev].filter((item: any) => item.id !== id)
     }));
-    // إضافة toast notification
   };
 
   const handleReject = (type: string, id: number) => {
@@ -81,69 +84,14 @@ const Admin = () => {
       ...prev,
       [type]: prev[type as keyof typeof prev].filter((item: any) => item.id !== id)
     }));
-    // إضافة toast notification
   };
 
-  const tabs = [
-    { id: 'overview', label: 'نظرة عامة', icon: BarChart3 },
-    { id: 'pending', label: 'في انتظار المراجعة', icon: Clock },
-    { id: 'users', label: 'إدارة المستخدمين', icon: Users },
-    { id: 'settings', label: 'الإعدادات', icon: Settings }
-  ];
-
-  const renderPendingItems = (items: any[], type: string, title: string) => (
-    <InfoCard className="mb-6">
-      <h3 className="text-lg font-bold text-gray-900 mb-4">{title}</h3>
-      {items.length === 0 ? (
-        <p className="text-gray-500 text-center py-4">لا توجد عناصر في انتظار المراجعة</p>
-      ) : (
-        <div className="space-y-3">
-          {items.map((item) => (
-            <div key={item.id} className="border border-gray-200 rounded-lg p-4">
-              <div className="flex items-start justify-between">
-                <div className="flex-grow">
-                  <h4 className="font-medium text-gray-900 mb-1">{item.title}</h4>
-                  <p className="text-sm text-gray-600 mb-2">بواسطة: {item.author}</p>
-                  <div className="flex items-center space-x-4 space-x-reverse text-xs text-gray-500">
-                    <span>📅 {item.date}</span>
-                    {item.category && <span>🏷️ {item.category}</span>}
-                    {item.location && <span>📍 {item.location}</span>}
-                    {item.size && <span>📁 {item.size}</span>}
-                  </div>
-                </div>
-                
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <button
-                    onClick={() => {/* معاينة */}}
-                    className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                    title="معاينة"
-                  >
-                    <Eye className="h-4 w-4" />
-                  </button>
-                  
-                  <button
-                    onClick={() => handleApprove(type, item.id)}
-                    className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors"
-                    title="موافقة"
-                  >
-                    <Check className="h-4 w-4" />
-                  </button>
-                  
-                  <button
-                    onClick={() => handleReject(type, item.id)}
-                    className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-                    title="رفض"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </InfoCard>
-  );
+  const pendingCounts = {
+    laws: pendingItems.laws.length,
+    files: pendingItems.files.length,
+    topics: pendingItems.topics.length,
+    centers: pendingItems.centers.length
+  };
 
   return (
     <Layout>
@@ -155,114 +103,42 @@ const Admin = () => {
       />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Navigation Tabs */}
-        <div className="border-b border-gray-200 mb-8">
-          <nav className="flex space-x-8 space-x-reverse">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 space-x-reverse py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === tab.id
-                      ? 'border-primary-500 text-primary-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <Icon className="h-5 w-5" />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </nav>
-        </div>
+        <AdminTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-        {/* Content based on active tab */}
         {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Statistics Cards */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <InfoCard>
-                  <div className="flex items-center space-x-3 space-x-reverse">
-                    <div className="p-3 bg-blue-100 text-blue-600 rounded-lg">
-                      <Users className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold text-gray-900">{stats.totalUsers}</p>
-                      <p className="text-gray-600">إجمالي المستخدمين</p>
-                      <p className="text-sm text-green-600">+{stats.newUsersThisMonth} هذا الشهر</p>
-                    </div>
-                  </div>
-                </InfoCard>
-                
-                <InfoCard>
-                  <div className="flex items-center space-x-3 space-x-reverse">
-                    <div className="p-3 bg-green-100 text-green-600 rounded-lg">
-                      <FileText className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold text-gray-900">{stats.totalPosts}</p>
-                      <p className="text-gray-600">إجمالي المشاركات</p>
-                      <p className="text-sm text-green-600">+{stats.postsThisMonth} هذا الشهر</p>
-                    </div>
-                  </div>
-                </InfoCard>
-              </div>
-
-              {/* Pending Items Summary */}
-              <InfoCard>
-                <h3 className="text-lg font-bold text-gray-900 mb-4">العناصر في انتظار المراجعة</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-orange-600">{pendingItems.laws.length}</div>
-                    <div className="text-sm text-gray-600">قوانين مقترحة</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-purple-600">{pendingItems.files.length}</div>
-                    <div className="text-sm text-gray-600">ملفات جديدة</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">{pendingItems.topics.length}</div>
-                    <div className="text-sm text-gray-600">مواضيع منتدى</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">{pendingItems.centers.length}</div>
-                    <div className="text-sm text-gray-600">مراكز قانونية</div>
-                  </div>
-                </div>
-              </InfoCard>
-            </div>
-
-            {/* Most Active Users */}
-            <div>
-              <InfoCard>
-                <h3 className="text-lg font-bold text-gray-900 mb-4">الأكثر نشاطاً</h3>
-                <div className="space-y-3">
-                  {stats.mostActiveUsers.map((user, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div>
-                        <p className="font-medium text-gray-900">{user.name}</p>
-                        <p className="text-sm text-gray-600">{user.posts} مشاركة</p>
-                      </div>
-                      <div className="text-sm font-medium text-green-600">
-                        {user.engagement}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </InfoCard>
-            </div>
-          </div>
+          <AdminOverview stats={stats} pendingCounts={pendingCounts} />
         )}
 
         {activeTab === 'pending' && (
           <div className="space-y-6">
-            {renderPendingItems(pendingItems.laws, 'laws', 'القوانين المقترحة')}
-            {renderPendingItems(pendingItems.files, 'files', 'الملفات الجديدة')}
-            {renderPendingItems(pendingItems.topics, 'topics', 'مواضيع المنتدى')}
-            {renderPendingItems(pendingItems.centers, 'centers', 'المراكز القانونية')}
+            <PendingItemsList
+              items={pendingItems.laws}
+              type="laws"
+              title="القوانين المقترحة"
+              onApprove={handleApprove}
+              onReject={handleReject}
+            />
+            <PendingItemsList
+              items={pendingItems.files}
+              type="files"
+              title="الملفات الجديدة"
+              onApprove={handleApprove}
+              onReject={handleReject}
+            />
+            <PendingItemsList
+              items={pendingItems.topics}
+              type="topics"
+              title="مواضيع المنتدى"
+              onApprove={handleApprove}
+              onReject={handleReject}
+            />
+            <PendingItemsList
+              items={pendingItems.centers}
+              type="centers"
+              title="المراكز القانونية"
+              onApprove={handleApprove}
+              onReject={handleReject}
+            />
           </div>
         )}
 
