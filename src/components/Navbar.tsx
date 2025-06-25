@@ -2,12 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { Home, Book, Gavel, HelpCircle, FileText, MessageSquare, Users, Inbox, Info, Phone, LogIn, X, Menu } from 'lucide-react';
+import { Home, Book, Gavel, HelpCircle, FileText, MessageSquare, Users, Inbox, Info, Phone, LogIn, X, Menu, Bell, Shield } from 'lucide-react';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(3); // Mock count
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -113,30 +114,55 @@ const Navbar = () => {
             {/* User Menu and Mobile Menu Button */}
             <div className="flex items-center space-x-3 space-x-reverse">
               {user ? (
-                <div className="relative group">
-                  <button className="flex items-center space-x-2 space-x-reverse px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-primary-700 hover:bg-primary-50 transition-colors">
-                    <div className="bg-primary-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">
-                      {user.name.charAt(0)}
-                    </div>
-                    <span className="hidden sm:block">{user.name}</span>
-                  </button>
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                    <div className="py-1">
-                      <Link
-                        to="/dashboard"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 transition-colors"
-                      >
-                        لوحة التحكم
-                      </Link>
-                      <button
-                        onClick={logout}
-                        className="block w-full text-right px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                      >
-                        تسجيل الخروج
-                      </button>
+                <>
+                  {/* Notifications Bell */}
+                  <Link
+                    to="/notifications"
+                    className="relative p-2 text-gray-700 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-colors"
+                  >
+                    <Bell className="h-5 w-5" />
+                    {unreadNotifications > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                      </span>
+                    )}
+                  </Link>
+
+                  {/* User Dropdown */}
+                  <div className="relative group">
+                    <button className="flex items-center space-x-2 space-x-reverse px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-primary-700 hover:bg-primary-50 transition-colors">
+                      <div className="bg-primary-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">
+                        {user.name.charAt(0)}
+                      </div>
+                      <span className="hidden sm:block">{user.name}</span>
+                    </button>
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                      <div className="py-1">
+                        <Link
+                          to="/dashboard"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 transition-colors"
+                        >
+                          لوحة التحكم
+                        </Link>
+                        {user.role === 'admin' && (
+                          <Link
+                            to="/admin"
+                            className="flex items-center space-x-2 space-x-reverse px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 transition-colors"
+                          >
+                            <Shield className="h-4 w-4" />
+                            <span>لوحة المشرفين</span>
+                          </Link>
+                        )}
+                        <button
+                          onClick={logout}
+                          className="block w-full text-right px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                        >
+                          تسجيل الخروج
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </>
               ) : (
                 <Link
                   to="/auth"
@@ -174,6 +200,25 @@ const Navbar = () => {
           <div className="xl:hidden fixed top-16 right-0 left-0 bottom-0 bg-white z-50 overflow-y-auto mobile-nav">
             <div className="mobile-container py-4">
               <div className="space-y-1">
+                {/* Mobile notifications link for logged in users */}
+                {user && (
+                  <Link
+                    to="/notifications"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center space-x-3 space-x-reverse px-4 py-3 rounded-md text-base font-medium text-gray-700 hover:text-primary-700 hover:bg-primary-50 transition-colors mobile-button"
+                  >
+                    <div className="relative">
+                      <Bell className="h-5 w-5" />
+                      {unreadNotifications > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                          {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                        </span>
+                      )}
+                    </div>
+                    <span>الإشعارات</span>
+                  </Link>
+                )}
+
                 {navigationItems.map((item) => {
                   const Icon = item.icon;
                   return (
