@@ -56,10 +56,29 @@
   body {
     @apply bg-background text-foreground font-cairo;
     direction: rtl;
+    /* Improve touch scrolling on mobile */
+    -webkit-overflow-scrolling: touch;
+    /* Prevent zoom on input focus on iOS */
+    -webkit-text-size-adjust: 100%;
   }
 
   html {
     direction: rtl;
+    /* Prevent horizontal scrolling */
+    overflow-x: hidden;
+  }
+
+  /* Ensure all text inputs are properly sized on mobile */
+  input, textarea, select {
+    @apply text-base;
+    /* Prevent zoom on focus on iOS */
+    font-size: 16px !important;
+  }
+
+  /* Improve button touch targets on mobile */
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
   }
 }
 
@@ -74,7 +93,7 @@
   text-align: right;
 }
 
-/* Smooth transitions for interactive elements */
+/* Mobile-optimized transitions */
 .transition-colors {
   transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
@@ -83,6 +102,71 @@
   transition: transform 0.2s ease;
 }
 
-.hover-scale:hover {
-  transform: scale(1.02);
+/* Only apply hover effects on non-touch devices */
+@media (hover: hover) {
+  .hover-scale:hover {
+    transform: scale(1.02);
+  }
+}
+
+/* Mobile-specific improvements */
+@layer utilities {
+  /* Touch-friendly spacing */
+  .touch-spacing > * + * {
+    @apply mt-4;
+  }
+
+  /* Mobile-optimized grid gaps */
+  .mobile-grid-gap {
+    @apply gap-4 md:gap-6;
+  }
+
+  /* Mobile-friendly text sizes */
+  .mobile-text-responsive {
+    @apply text-sm md:text-base;
+  }
+
+  /* Prevent text overflow on small screens */
+  .mobile-text-overflow {
+    @apply break-words hyphens-auto;
+  }
+
+  /* Mobile-optimized containers */
+  .mobile-container {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Touch-friendly buttons */
+  .mobile-button {
+    @apply min-h-[44px] px-4 py-3 text-base;
+  }
+
+  /* Mobile-friendly cards */
+  .mobile-card {
+    @apply p-4 md:p-6;
+  }
+}
+
+/* Fix for mobile menu overlays */
+.mobile-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 40;
+}
+
+/* Ensure proper stacking for mobile navigation */
+.mobile-nav {
+  z-index: 50;
+}
+
+/* Mobile-specific scrollbar styles */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+  }
 }
