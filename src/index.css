@@ -54,12 +54,23 @@
   }
 
   body {
-    @apply bg-background text-foreground font-cairo;
+    @apply bg-background text-foreground;
     direction: rtl;
+    /* Font loading optimization */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-display: swap;
     /* Improve touch scrolling on mobile */
     -webkit-overflow-scrolling: touch;
     /* Prevent zoom on input focus on iOS */
     -webkit-text-size-adjust: 100%;
+    /* Smooth font loading transition */
+    transition: font-family 0.2s ease;
+  }
+
+  /* Apply Cairo font only when loaded */
+  .fonts-loaded body,
+  body.fonts-loaded {
+    font-family: 'Cairo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
 
   html {
@@ -79,6 +90,22 @@
   button, a {
     min-height: 44px;
     min-width: 44px;
+  }
+}
+
+/* Font loading states */
+@layer utilities {
+  .font-loading {
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+  }
+
+  .font-loaded {
+    opacity: 1;
+  }
+
+  .font-fallback {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
   }
 }
 

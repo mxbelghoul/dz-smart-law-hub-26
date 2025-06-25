@@ -12,9 +12,21 @@
     <meta property="og:description" content="منصة قانونية ذكية تقدم محتوى قانوني مبسط ودقيق للمواطن الجزائري" />
     <meta property="og:type" content="website" />
 
+    <!-- Optimized font preloading and loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Critical font subset preload for faster initial render -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap"></noscript>
+    
+    <!-- Fallback for when font fails to load -->
+    <style>
+      /* Font loading optimization with fallback */
+      body { 
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Cairo', sans-serif;
+        font-display: swap;
+      }
+    </style>
   </head>
 
   <body>
