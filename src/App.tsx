@@ -21,6 +21,11 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
+// New interactive pages
+import NewTopic from "./pages/NewTopic";
+import UploadFile from "./pages/UploadFile";
+import AddLaw from "./pages/AddLaw";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -33,12 +38,15 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/laws" element={<Laws />} />
+            <Route path="/laws/add" element={<AddLaw />} />
             <Route path="/procedures" element={<Procedures />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/forum" element={<Forum />} />
+            <Route path="/forum/new-topic" element={<NewTopic />} />
             <Route path="/centers" element={<Centers />} />
             <Route path="/library" element={<Library />} />
+            <Route path="/library/upload" element={<UploadFile />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/auth" element={<Auth />} />

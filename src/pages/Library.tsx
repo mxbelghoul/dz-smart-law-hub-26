@@ -1,9 +1,10 @@
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import PageHeader from '@/components/custom/PageHeader';
 import InfoCard from '@/components/custom/InfoCard';
-import { Inbox, Download, FileText, Search, Filter, Upload } from 'lucide-react';
+import { Inbox, Download, FileText, Search, Filter, Upload, Plus } from 'lucide-react';
 
 const Library = () => {
   const [selectedCategory, setSelectedCategory] = useState('جميع الفئات');
@@ -121,10 +122,13 @@ const Library = () => {
               <span>فلاتر متقدمة</span>
             </button>
             
-            <button className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors flex items-center space-x-2 space-x-reverse">
-              <Upload className="h-4 w-4" />
+            <Link
+              to="/library/upload"
+              className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors flex items-center space-x-2 space-x-reverse"
+            >
+              <Plus className="h-4 w-4" />
               <span>رفع ملف جديد</span>
-            </button>
+            </Link>
           </div>
         </div>
 

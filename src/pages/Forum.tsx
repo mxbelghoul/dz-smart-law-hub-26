@@ -1,9 +1,10 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import PageHeader from '@/components/custom/PageHeader';
 import InfoCard from '@/components/custom/InfoCard';
-import { MessageSquare, User, Clock, ThumbsUp, Reply } from 'lucide-react';
+import { MessageSquare, User, Clock, ThumbsUp, Reply, Plus } from 'lucide-react';
 
 const Forum = () => {
   const forumTopics = [
@@ -78,9 +79,13 @@ const Forum = () => {
             </div>
           </div>
           
-          <button className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors whitespace-nowrap">
-            موضوع جديد +
-          </button>
+          <Link
+            to="/forum/new-topic"
+            className="flex items-center space-x-2 space-x-reverse bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors whitespace-nowrap"
+          >
+            <Plus className="h-5 w-5" />
+            <span>موضوع جديد</span>
+          </Link>
         </div>
 
         {/* Forum Topics */}
