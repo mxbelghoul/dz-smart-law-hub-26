@@ -35,6 +35,16 @@ interface OptimizedIconProps extends Omit<LucideProps, 'ref'> {
   critical?: boolean;
 }
 
+// Helper function to convert size to number
+const getSizeAsNumber = (size?: string | number, fallback: number = 24): number => {
+  if (typeof size === 'number') return size;
+  if (typeof size === 'string') {
+    const parsed = parseInt(size, 10);
+    return isNaN(parsed) ? fallback : parsed;
+  }
+  return fallback;
+};
+
 const OptimizedIcon: React.FC<OptimizedIconProps> = memo(({ 
   name, 
   fallbackSize, 
@@ -47,6 +57,9 @@ const OptimizedIcon: React.FC<OptimizedIconProps> = memo(({
     return <CachedIcon {...props} />;
   }
 
+  // Convert size to number for fallback component
+  const numericSize = getSizeAsNumber(fallbackSize || props.size);
+
   // For critical icons, load immediately without lazy loading
   if (critical || CRITICAL_ICONS.includes(name as any)) {
     const IconComponent = lazy(async () => {
@@ -56,7 +69,7 @@ const OptimizedIcon: React.FC<OptimizedIconProps> = memo(({
     });
 
     return (
-      <Suspense fallback={<IconFallback size={fallbackSize || props.size} />}>
+      <Suspense fallback={<IconFallback size={numericSize} />}>
         <IconComponent {...props} />
       </Suspense>
     );
@@ -70,7 +83,7 @@ const OptimizedIcon: React.FC<OptimizedIconProps> = memo(({
   });
 
   return (
-    <Suspense fallback={<IconFallback size={fallbackSize || props.size} />}>
+    <Suspense fallback={<IconFallback size={numericSize} />}>
       <LazyIcon {...props} />
     </Suspense>
   );
