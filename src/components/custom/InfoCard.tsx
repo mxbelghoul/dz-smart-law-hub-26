@@ -2,7 +2,7 @@
 import React from 'react';
 
 interface InfoCardProps {
-  title: string;
+  title?: string;
   description?: string;
   icon?: React.ComponentType<{ className?: string }>;
   value?: string | number;
@@ -34,14 +34,16 @@ const InfoCard: React.FC<InfoCardProps> = ({
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <div className="flex items-center space-x-3 space-x-reverse mb-2">
-            {Icon && (
-              <div className="p-2 bg-primary-100 text-primary-600 rounded-md">
-                <Icon className="h-5 w-5" />
-              </div>
-            )}
-            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-          </div>
+          {title && (
+            <div className="flex items-center space-x-3 space-x-reverse mb-2">
+              {Icon && (
+                <div className="p-2 bg-primary-100 text-primary-600 rounded-md">
+                  <Icon className="h-5 w-5" />
+                </div>
+              )}
+              <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+            </div>
+          )}
           
           {value && (
             <div className="mb-2">
