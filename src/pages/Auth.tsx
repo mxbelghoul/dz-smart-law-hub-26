@@ -2,20 +2,22 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogIn, UserPlus, Mail, Lock, User } from 'lucide-react';
 import Layout from '@/components/Layout';
-import AppButton from '@/components/custom/AppButton';
-import { toast } from '@/hooks/use-toast';
+import { LogIn, UserPlus, Mail, Lock, User, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   
   const { login, register } = useAuth();
   const navigate = useNavigate();
@@ -23,206 +25,188 @@ const Auth = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
     try {
       if (isLogin) {
-        const success = await login(formData.email, formData.password);
-        if (success) {
-          toast({
-            title: "تم تسجيل الدخول بنجاح",
-            description: "مرحباً بك في الموسوعة القانونية الجزائرية",
-          });
-          navigate('/');
-        } else {
-          toast({
-            title: "خطأ في تسجيل الدخول",
-            description: "البريد الإلكتروني أو كلمة المرور غير صحيحة",
-            variant: "destructive",
-          });
-        }
+        await login(email, password);
+        navigate('/dashboard');
       } else {
-        if (formData.password !== formData.confirmPassword) {
-          toast({
-            title: "خطأ في التسجيل",
-            description: "كلمتا المرور غير متطابقتان",
-            variant: "destructive",
-          });
-          return;
+        if (password !== confirmPassword) {
+          throw new Error('كلمات المرور غير متطابقة');
         }
-        
-        const success = await register(formData.name, formData.email, formData.password);
-        if (success) {
-          toast({
-            title: "تم إنشاء الحساب بنجاح",
-            description: "مرحباً بك في الموسوعة القانونية الجزائرية",
-          });
-          navigate('/');
-        } else {
-          toast({
-            title: "خطأ في التسجيل",
-            description: "البريد الإلكتروني مستخدم بالفعل",
-            variant: "destructive",
-          });
-        }
+        await register(email, password, name);
+        navigate('/dashboard');
       }
-    } catch (error) {
-      toast({
-        title: "حدث خطأ",
-        description: "حاول مرة أخرى لاحقاً",
-        variant: "destructive",
-      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'حدث خطأ غير متوقع');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
-  };
-
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          <div className="text-center">
-            <div className="mx-auto h-16 w-16 bg-primary-600 rounded-full flex items-center justify-center">
-              {isLogin ? (
-                <LogIn className="h-8 w-8 text-white" />
-              ) : (
-                <UserPlus className="h-8 w-8 text-white" />
-              )}
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-blue-50 py-12">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          {/* Search Bar */}
+          <div className="mb-8">
+            <div className="relative max-w-md mx-auto">
+              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <Input
+                type="text"
+                placeholder="البحث في الموقع..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pr-10 pl-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 rtl-input"
+              />
             </div>
-            <h2 className="mt-6 text-3xl font-bold text-gray-900">
-              {isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد'}
-            </h2>
-            <p className="mt-2 text-sm text-gray-600">
-              {isLogin 
-                ? 'ادخل إلى حسابك للوصول إلى جميع الخدمات' 
-                : 'انضم إلى مجتمع الموسوعة القانونية الجزائرية'
-              }
-            </p>
           </div>
 
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            <div className="space-y-4">
-              {!isLogin && (
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                    الاسم الكامل
-                  </label>
-                  <div className="relative">
-                    <User className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                    <input
-                      id="name"
-                      name="name"
-                      type="text"
-                      required={!isLogin}
-                      value={formData.name}
-                      onChange={handleChange}
-                      className="w-full pr-10 pl-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 rtl-input"
-                      placeholder="أدخل اسمك الكامل"
-                    />
+          <div className="flex justify-center">
+            <Card className="w-full max-w-md">
+              <CardHeader className="text-center">
+                <div className="flex justify-center mb-4">
+                  <div className="bg-primary-600 text-white p-3 rounded-full">
+                    {isLogin ? (
+                      <LogIn className="h-6 w-6" />
+                    ) : (
+                      <UserPlus className="h-6 w-6" />
+                    )}
                   </div>
                 </div>
-              )}
+                <CardTitle className="text-2xl font-bold text-gray-900">
+                  {isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد'}
+                </CardTitle>
+                <CardDescription>
+                  {isLogin 
+                    ? 'أدخل بياناتك للوصول إلى حسابك'
+                    : 'أنشئ حساباً جديداً للاستفادة من جميع الخدمات'
+                  }
+                </CardDescription>
+              </CardHeader>
 
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  البريد الإلكتروني
-                </label>
-                <div className="relative">
-                  <Mail className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full pr-10 pl-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 rtl-input"
-                    placeholder="أدخل بريدك الإلكتروني"
-                  />
-                </div>
-              </div>
+              <form onSubmit={handleSubmit}>
+                <CardContent className="space-y-4">
+                  {error && (
+                    <Alert variant="destructive">
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  )}
 
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                  كلمة المرور
-                </label>
-                <div className="relative">
-                  <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    required
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="w-full pr-10 pl-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 rtl-input"
-                    placeholder="أدخل كلمة المرور"
-                  />
-                </div>
-              </div>
+                  {!isLogin && (
+                    <div className="space-y-2">
+                      <label htmlFor="name" className="text-sm font-medium text-gray-700">
+                        الاسم الكامل
+                      </label>
+                      <div className="relative">
+                        <User className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Input
+                          id="name"
+                          type="text"
+                          placeholder="أدخل اسمك الكامل"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          className="pr-10"
+                          required={!isLogin}
+                        />
+                      </div>
+                    </div>
+                  )}
 
-              {!isLogin && (
-                <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                    تأكيد كلمة المرور
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                    <input
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      type="password"
-                      required={!isLogin}
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      className="w-full pr-10 pl-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 rtl-input"
-                      placeholder="أعد إدخال كلمة المرور"
-                    />
+                  <div className="space-y-2">
+                    <label htmlFor="email" className="text-sm font-medium text-gray-700">
+                      البريد الإلكتروني
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="أدخل بريدك الإلكتروني"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pr-10"
+                        required
+                      />
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
 
-            <AppButton
-              type="submit"
-              className="w-full"
-              size="lg"
-              loading={loading}
-              icon={isLogin ? LogIn : UserPlus}
-            >
-              {isLogin ? 'تسجيل الدخول' : 'إنشاء الحساب'}
-            </AppButton>
-          </form>
+                  <div className="space-y-2">
+                    <label htmlFor="password" className="text-sm font-medium text-gray-700">
+                      كلمة المرور
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="أدخل كلمة المرور"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pr-10"
+                        required
+                      />
+                    </div>
+                  </div>
 
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              {isLogin ? 'ليس لديك حساب؟' : 'لديك حساب بالفعل؟'}
-              <button
-                onClick={() => setIsLogin(!isLogin)}
-                className="mr-2 font-medium text-primary-600 hover:text-primary-500 transition-colors"
-              >
-                {isLogin ? 'إنشاء حساب جديد' : 'تسجيل الدخول'}
-              </button>
-            </p>
-          </div>
+                  {!isLogin && (
+                    <div className="space-y-2">
+                      <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
+                        تأكيد كلمة المرور
+                      </label>
+                      <div className="relative">
+                        <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Input
+                          id="confirmPassword"
+                          type="password"
+                          placeholder="أعد إدخال كلمة المرور"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          className="pr-10"
+                          required={!isLogin}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
 
-          {/* Demo Accounts */}
-          <div className="bg-primary-50 rounded-lg p-4">
-            <h3 className="text-sm font-medium text-primary-900 mb-2">حسابات تجريبية:</h3>
-            <div className="space-y-2 text-sm text-primary-700">
-              <div>
-                <strong>مستخدم عادي:</strong> user@test.com / 123456
-              </div>
-              <div>
-                <strong>مشرف:</strong> admin@test.com / admin123
-              </div>
-            </div>
+                <CardFooter className="flex flex-col space-y-4">
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={loading}
+                  >
+                    {loading ? 'جاري التحميل...' : (isLogin ? 'تسجيل الدخول' : 'إنشاء الحساب')}
+                  </Button>
+
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      onClick={() => setIsLogin(!isLogin)}
+                      className="text-sm text-primary-600 hover:text-primary-700 underline"
+                    >
+                      {isLogin 
+                        ? 'ليس لديك حساب؟ أنشئ حساباً جديداً'
+                        : 'لديك حساب بالفعل؟ سجل الدخول'
+                      }
+                    </button>
+                  </div>
+
+                  {isLogin && (
+                    <div className="text-center">
+                      <button
+                        type="button"
+                        className="text-sm text-gray-600 hover:text-gray-700 underline"
+                      >
+                        نسيت كلمة المرور؟
+                      </button>
+                    </div>
+                  )}
+                </CardFooter>
+              </form>
+            </Card>
           </div>
         </div>
       </div>
